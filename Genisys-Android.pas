@@ -14,9 +14,9 @@ program Genisys_Android;
 {$mode objfpc}
 uses dos,sysutils;
 
-const PROG_VER:string='v0.2.2 alpha';
-const HOME:string='/data/data/org.itxtech.genisysandroid/files/';
-//const HOME:string='/data/data/com.n0n3m4.droidpascal/files/';//Only for test
+const PROG_VER:string='v0.2.3 alpha';
+//const HOME:string='/data/data/org.itxtech.genisysandroid/files/';
+const HOME:string='/data/data/com.n0n3m4.droidpascal/files/';//Only for test
 const SHELL:string='/system/bin/sh';
 
 var WORKSPACE:string='/sdcard/Genisys/';
@@ -115,7 +115,7 @@ end;
 
 procedure textcolor(int:longint);
 begin;end;//usage of CRT unit will cause format errors
-
+{
 procedure writeVersion;
 var t:text;
 begin
@@ -123,7 +123,7 @@ begin
 	writeln(t,PROG_VER);
 	close(t);
 end;
-{
+
 procedure updateExecutable;
 begi
 
@@ -232,6 +232,11 @@ begin
 		writeln('Genisys Android');
 		writeln('Version: '+PROG_VER);
 		writeln('Github repo: https://github.com/iTXTech/Genisys-Android');
+		writeln;
+		writeln('This application itself is based on Terminal Emulator for Android by jackpal.');
+		writeln('This program is made by PeratX.');
+		writeln('Genisys is made by iTX Technologies.');
+		writeln('Genisys is a server software for Minecraft: Pocket Edition, which is based on the great project "PocketMine-MP".');
 		writeln;
 		writeln('Author: PeratX');
 		writeln('QQ: 1215714524');
