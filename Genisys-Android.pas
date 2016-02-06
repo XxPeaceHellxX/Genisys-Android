@@ -14,9 +14,9 @@ program Genisys_Android;
 {$mode objfpc}
 uses dos,sysutils;
 
-const PROG_VER:string='v0.2.3 alpha';
-//const HOME:string='/data/data/org.itxtech.genisysandroid/files/';
-const HOME:string='/data/data/com.n0n3m4.droidpascal/files/';//Only for test
+const PROG_VER:string='v0.2.5 alpha';
+const HOME:string='/data/data/org.itxtech.genisysandroid/files/';
+//const HOME:string='/data/data/com.n0n3m4.droidpascal/files/';//Only for test
 const SHELL:string='/system/bin/sh';
 
 var WORKSPACE:string='/sdcard/Genisys/';
@@ -41,12 +41,20 @@ begin
 	erase(t);
 end;
 
+procedure pause;
+begin
+	write('Press enter to continue ...');
+	readln;
+end;
+
 procedure throwError(str:string);
 begin
 	writeln;
 	//textcolor(12);
 	writeln('[ERROR] '+str);
-	execBusybox('sleep 1');
+	writeln;
+	pause;
+//	execBusybox('sleep 1');
 end;
 
 procedure initRuntimeFromZip(fileName:string);
@@ -78,15 +86,9 @@ begin
 	if not fileExists(WORKSPACE) then begin
 		throwError('Workspace not found, use /sdcard/Genisys/ as default');
 		 writeDefaultWorkspace;
-		 WORKSPACE:='/sdcard/Genisys';
+		 WORKSPACE:='/sdcard/Genisys/';
 	end;
 	close(t);
-end;
-
-procedure pause;
-begin
-	write('Press enter to continue ...');
-	readln;
 end;
 
 procedure saveWorkspace(dir:string);
@@ -154,6 +156,7 @@ begin
 	//writeVersion;
 	execBusybox('rm '+HOME+'executable');
 	execBusybox('mkdir '+WORKSPACE, false);
+	execBusybox('mkdir '+WORKSPACE+'tmp', false);
 	execBusybox('clear');
 	textcolor(11);//AQUA
 	writeln('Genisys Android '+PROG_VER);
