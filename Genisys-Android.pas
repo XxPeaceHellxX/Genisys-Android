@@ -14,7 +14,7 @@ program Genisys_Android;
 {$mode objfpc}
 uses dos,sysutils;
 
-const PROG_VER:string='v0.2.1 alpha';
+const PROG_VER:string='v0.2.2 alpha';
 const HOME:string='/data/data/org.itxtech.genisysandroid/files/';
 //const HOME:string='/data/data/com.n0n3m4.droidpascal/files/';//Only for test
 const SHELL:string='/system/bin/sh';
@@ -166,7 +166,7 @@ begin
 	writeln('a. Init Genisys Android from zips');
 //	writeln;
 	textcolor(6);//YELLOW
-	writeln('[NOTICE] Put php.zip and Genisys.zip into /sdcard/Genisys');
+	writeln('[NOTICE] Put php.zip and Genisys.zip into '+WORKSPACE);
 //	writeln;
 	textcolor(15);
 	writeln('b. Launch Genisys');
