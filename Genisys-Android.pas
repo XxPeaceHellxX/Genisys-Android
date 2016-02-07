@@ -1,3 +1,4 @@
+
 {
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,142 +9,164 @@
  * Genisys-Android Project
 }
 
-program Genisys_Android;
+Program Genisys_Android;
 
 {$mode objfpc}
 
-uses dos,sysutils;
+Uses dos,sysutils;
 
-const PROG_VER:string='v0.2.6 alpha';
-const HOME:string='/data/data/org.itxtech.genisysandroid/files/';
-//const HOME:string='/data/data/com.n0n3m4.droidpascal/files/';//Only for test
-const SHELL:string='/system/bin/sh';
+Const PROG_VER: string = 'v0.2.7 alpha';
 
-var WORKSPACE:string='/sdcard/Genisys/';
+Const SHELL: string = '/system/bin/sh';
 
-procedure testPerm;
-var
-	t:text;
-	path:string;
-begin
-	try
-		assign(t,HOME+'settings.conf');
-		reset(t);
-		close(t);
-	except
-		on EInOutError do begin
-			path:=extractFilePath(paramstr(0));
+
+Var 
+  HOME: string;
+  WORKSPACE: string = '/sdcard/Genisys/';
+
+Procedure testPerm;
+
+Var 
+  t: text;
+  //path:string;
+Begin
+  Try
+    assign(t,HOME+'settings.conf');
+    reset(t);
+    close(t);
+  Except
+    on EInOutError Do
+    Begin
+
+{path:=extractFilePath(paramstr(0));
 			writeln('[NOTICE] Current working path '+path);
 			if path <> HOME then begin
 				writeln('[ALERT] Wrong working dir !');
 				writeln('[NOTICE] Try to reinstall the application !');
-			end;
-			writeln('[ERROR] Unable to access '+HOME+'settings.conf : Permission denied !');
-			halt;
-		end;
-		else begin
-			writeln('[ERROR] Unable to access '+HOME+'settings.conf : Unknown error');
-			halt;
-		end;
-	end;
-end;
+			end;}
+      writeln('[ERROR] Unable to access '+HOME+'settings.conf : Permission denied !');
+      halt;
+    End;
+    Else
+      Begin
+        writeln('[ERROR] Unable to access '+HOME+'settings.conf : Unknown error');
+        halt;
+      End;
+End;
+End;
 
-procedure execBusybox(cmd:string;needLine:boolean = true);
-begin
-	exec(HOME+'busybox', cmd);
-	if needLine then writeln;
-end;
+Procedure execBusybox(cmd:String;needLine:boolean = true);
+Begin
+  exec(HOME+'busybox', cmd);
+  If needLine Then writeln;
+End;
 
-procedure execPhp(homedir,fileName:string);
-var t:text;
-begin
-	execBusybox('chmod 777 '+HOME+'php');
-	//Set Perm
-	assign(t,HOME+'temp.sh');rewrite(t);
-	writeln(t,'cd '+WORKSPACE);
-	writeln(t,'export TMPDIR='+WORKSPACE+'tmp');
-	writeln(t,HOME+'php '+fileName);
-	close(t);
-	exec(SHELL, HOME+'temp.sh');
-	erase(t);
-end;
+Procedure execPhp(homedir,fileName:String);
 
-procedure pause;
-begin
-	write('Press enter to continue ...');
-	readln;
-end;
+Var t: text;
+Begin
+  execBusybox('chmod 777 '+HOME+'php');
+  //Set Perm
+  assign(t,HOME+'temp.sh');
+  rewrite(t);
+  writeln(t,'cd '+WORKSPACE);
+  writeln(t,'export TMPDIR='+WORKSPACE+'tmp');
+  writeln(t,HOME+'php '+fileName);
+  close(t);
+  exec(SHELL, HOME+'temp.sh');
+  erase(t);
+End;
 
-procedure throwError(str:string);
-begin
-	writeln;
-	//textcolor(12);
-	writeln('[ERROR] '+str);
-	writeln;
-	pause;
-//	execBusybox('sleep 1');
-end;
+Procedure pause;
+Begin
+  write('Press enter to continue ...');
+  readln;
+End;
 
-procedure initRuntimeFromZip(fileName:string);
-begin
-	execBusybox('unzip -o '+fileName+' -d '+HOME);
-end;
+Procedure throwError(str:String);
+Begin
+  writeln;
+  //textcolor(12);
+  writeln('[ERROR] '+str);
+  writeln;
+  pause;
+  //	execBusybox('sleep 1');
+End;
 
-procedure initCoreFromZip(fileName:string);
-begin
-	execBusybox('unzip -o '+fileName+' -d '+WORKSPACE);
-end;
+Procedure initRuntimeFromZip(fileName:String);
+Begin
+  execBusybox('unzip -o '+fileName+' -d '+HOME);
+End;
 
-procedure writeDefaultWorkspace;
-var t:text;
-begin
-	assign(t,HOME+'settings.conf');rewrite(t);
-	writeln(t,'/sdcard/Genisys/');
-	close(t);
-end;
+Procedure initCoreFromZip(fileName:String);
+Begin
+  execBusybox('unzip -o '+fileName+' -d '+WORKSPACE);
+End;
 
-procedure initWorkspace;
-var t:text;
-begin
-	if not fileExists(HOME+'settings.conf') then begin
-		writeDefaultWorkspace;
-	end;
-	assign(t,HOME+'settings.conf');reset(t);
-	readln(t,WORKSPACE);
-	if not fileExists(WORKSPACE) then begin
-		throwError('Workspace not found, use /sdcard/Genisys/ as default');
-		 writeDefaultWorkspace;
-		 WORKSPACE:='/sdcard/Genisys/';
-	end;
-	close(t);
-end;
+Procedure writeDefaultWorkspace;
 
-procedure saveWorkspace(dir:string);
-var t:text;
-begin
-	if (dir[length(dir)] <> '/') then dir:=dir+'/';
-	WORKSPACE:=dir;
-	assign(t,HOME+'settings.conf');rewrite(t);
-	writeln(t,dir);
-	close(t);
-end;
+Var t: text;
+Begin
+  assign(t,HOME+'settings.conf');
+  rewrite(t);
+  writeln(t,'/sdcard/Genisys/');
+  close(t);
+End;
 
-procedure initPhpConf(force:boolean = false);
-var t:text;
-begin
-	if force or not fileExists(HOME+'php.ini') then begin
-	assign(t,HOME+'php.ini');rewrite(t);
-	writeln(t,'date.timezone=CDT');
-	writeln(t,'short_open_tag=0');
-	writeln(t,'asp_tags=0');
-	writeln(t,'phar.readonly=0');
-	writeln(t,'phar.require_hash=1');
-	close(t);
-	end;
-end;
+Procedure initWorkspace;
 
-procedure textcolor(int:longint);
-begin;end;//usage of CRT unit will cause format errors
+Var t: text;
+Begin
+  If Not fileExists(HOME+'settings.conf') Then
+    Begin
+      writeDefaultWorkspace;
+    End;
+  assign(t,HOME+'settings.conf');
+  reset(t);
+  readln(t,WORKSPACE);
+  If Not fileExists(WORKSPACE) Then
+    Begin
+      throwError('Workspace not found, use /sdcard/Genisys/ as default');
+      writeDefaultWorkspace;
+      WORKSPACE := '/sdcard/Genisys/';
+    End;
+  close(t);
+End;
+
+Procedure saveWorkspace(dir:String);
+
+Var t: text;
+Begin
+  If (dir[length(dir)] <> '/') Then dir := dir+'/';
+  WORKSPACE := dir;
+  assign(t,HOME+'settings.conf');
+  rewrite(t);
+  writeln(t,dir);
+  close(t);
+End;
+
+Procedure initPhpConf(force:boolean = false);
+
+Var t: text;
+Begin
+  If force Or Not fileExists(HOME+'php.ini') Then
+    Begin
+      assign(t,HOME+'php.ini');
+      rewrite(t);
+      writeln(t,'date.timezone=CDT');
+      writeln(t,'short_open_tag=0');
+      writeln(t,'asp_tags=0');
+      writeln(t,'phar.readonly=0');
+      writeln(t,'phar.require_hash=1');
+      close(t);
+    End;
+End;
+
+Procedure textcolor(int:longint);
+Begin;
+End;
+//usage of CRT unit will cause format errors
+
 {
 procedure writeVersion;
 var t:text;
@@ -174,125 +197,164 @@ begin
 	end;
 end;
 }
-procedure main;
-var opt:string;
-begin
-	testPerm;
-	initWorkspace;
-	initPhpconf;
-	//checkUpdate;
-	//writeVersion;
-	execBusybox('rm '+HOME+'executable');
-	execBusybox('mkdir '+WORKSPACE, false);
-	execBusybox('mkdir '+WORKSPACE+'tmp', false);
-	execBusybox('clear');
-	textcolor(11);//AQUA
-	writeln('Genisys Android '+PROG_VER);
-	textcolor(13);//PURPLE
-	writeln('Powered by iTX Technologies');
-	writeln;
-	writeln('Workspace: '+WORKSPACE);
-	writeln;
-	textcolor(15);//WHITE
-	writeln('a. Init Genisys Android from zips');
-//	writeln;
-	textcolor(6);//YELLOW
-	writeln('[NOTICE] Put php.zip and Genisys.zip into '+WORKSPACE);
-//	writeln;
-	textcolor(15);
-	writeln('b. Launch Genisys');
-//	writeln;
-	writeln('c. Set workspace');
-//	writeln;
-	writeln('d. Edit php.ini');
-	writeln('[NOTICE] Please edit before launch Genisys');
-//	writeln;
-	writeln('e. Rewrite php.ini');
-	writeln;
-	writeln('i. About Genisys Android');
-	writeln;
-	write('Select: ');
+Procedure main;
 
-	readln(opt);
-	if opt = 'a' then begin
-		initRuntimeFromZip(WORKSPACE+'php.zip');
-		initCoreFromZip(WORKSPACE+'Genisys.zip');
-		writeln;
-		writeln('Done!');
-		writeln;
-		pause;
-		main;
-		exit;
-	end else if opt = 'b' then begin
-		if not fileExists(HOME+'php') then begin
-			throwError('Php runtime has not been installed !');
-			main;
-			exit;
-		end;
-		writeln;
-		writeln('[NOTICE] Now loading ...');
-		if fileExists(WORKSPACE+'Genisys.phar') then execPhp(WORKSPACE, 'Genisys.phar')
-		else if fileExists(WORKSPACE+'src/pocketmine/PocketMine.php') then execPhp(WORKSPACE, 'src/pocketmine/PocketMine.php')
-		else throwError('Genisys has not been installed !');
-		writeln;
-		pause;
-		main;
-		exit;
-	end else if opt = 'c' then begin
-		write('Please enter the full path of workspace ['+WORKSPACE+'] ');
-		readln(WORKSPACE);
-		if not fileExists(WORKSPACE) then begin
-			throwError(WORKSPACE+' does not exist');
-			writeln;
-			pause;
-			main;
-			exit;
-		end else begin
-			saveWorkspace(WORKSPACE);
-			writeln('[INFO] Workspace has changed to '+WORKSPACE);
-			writeln;
-			pause;
-			main;
-			exit;
-		end;
-	end else if opt = 'd' then begin
-		execBusybox('vi '+HOME+'php.ini');
-		pause;
-		main;
-		exit;
-	end else if opt = 'i' then begin
-		execBusybox('clear');
-		writeln('Genisys Android');
-		writeln('Version: '+PROG_VER);
-		writeln('Github repo: https://github.com/iTXTech/Genisys-Android');
-		writeln;
-		writeln('This application itself is based on Terminal Emulator for Android by jackpal.');
-		writeln('This program is made by PeratX.');
-		writeln('Genisys is made by iTX Technologies.');
-		writeln('Genisys is a server software for Minecraft: Pocket Edition, which is based on the great project "PocketMine-MP".');
-		writeln;
-		writeln('Author: PeratX');
-		writeln('QQ: 1215714524');
-		writeln('E-mail: 1215714524@qq.com');
-		writeln;
-		pause;
-		main;
-		exit;
-	end else if opt = 'e' then begin
-		initPhpConf(true);
-		writeln;
-		writeln('Done');
-		writeln;
-		pause;
-		main;
-		exit;
-	end else begin
-		throwError('Option not found !');
-		main;
-		exit;
-	end;
-end;
-begin
-	if paramcount = 0 then main
-	else if paramstr(1) = '-v' then writeln(PROG_VER);
-end.
+Var opt: string;
+Begin
+  HOME := extractFilePath(paramStr(0));
+  //Auto detect working home
+  testPerm;
+  initWorkspace;
+  initPhpconf;
+  //checkUpdate;
+  //writeVersion;
+  execBusybox('rm '+HOME+'executable');
+  execBusybox('mkdir '+WORKSPACE, false);
+  execBusybox('mkdir '+WORKSPACE+'tmp', false);
+  execBusybox('clear');
+  textcolor(11);
+  //AQUA
+  writeln('Genisys Android '+PROG_VER);
+  textcolor(13);
+  //PURPLE
+  writeln('Powered by iTX Technologies');
+  writeln;
+  writeln('Home: '+HOME);
+  writeln('Workspace: '+WORKSPACE);
+  writeln;
+  textcolor(15);
+  //WHITE
+  writeln('a. Init Genisys Android from zips');
+  //	writeln;
+  textcolor(6);
+  //YELLOW
+  writeln('[NOTICE] Put php.zip and Genisys.zip into '+WORKSPACE);
+  //	writeln;
+  textcolor(15);
+  writeln('b. Launch Genisys');
+  //	writeln;
+  writeln('c. Set workspace');
+  //	writeln;
+  writeln('d. Edit php.ini');
+  writeln('[NOTICE] Please edit before launch Genisys');
+  //	writeln;
+  writeln('e. Rewrite php.ini');
+  writeln;
+  writeln('i. About Genisys Android');
+  writeln;
+  write('Select: ');
+
+  readln(opt);
+  If opt = 'a' Then
+    Begin
+      initRuntimeFromZip(WORKSPACE+'php.zip');
+      initCoreFromZip(WORKSPACE+'Genisys.zip');
+      writeln;
+      writeln('Done!');
+      writeln;
+      pause;
+      main;
+      exit;
+    End
+  Else If opt = 'b' Then
+         Begin
+           If Not fileExists(HOME+'php') Then
+             Begin
+               throwError('Php runtime has not been installed !');
+               main;
+               exit;
+             End;
+           writeln;
+           writeln('[NOTICE] Now loading ...');
+           If fileExists(WORKSPACE+'Genisys.phar') Then execPhp(WORKSPACE, 'Genisys.phar')
+           Else If fileExists(WORKSPACE+'src/pocketmine/PocketMine.php') Then execPhp(WORKSPACE,
+                                                                     'src/pocketmine/PocketMine.php'
+                  )
+           Else throwError('Genisys has not been installed !');
+           writeln;
+           pause;
+           main;
+           exit;
+         End
+  Else If opt = 'c' Then
+         Begin
+           write('Please enter the full path of workspace ['+WORKSPACE+'] ');
+           readln(WORKSPACE);
+           If WORKSPACE = '' Then
+             Begin
+               writeln;
+               writeln('[INFO] Workspace has not changed');
+               writeln;
+               pause;
+               main;
+               exit;
+             End
+           Else
+             If Not fileExists(WORKSPACE) Then
+               Begin
+                 throwError(WORKSPACE+' does not exist');
+                 writeln;
+                 pause;
+                 main;
+                 exit;
+               End
+           Else
+             Begin
+               saveWorkspace(WORKSPACE);
+               writeln('[INFO] Workspace has changed to '+WORKSPACE);
+               writeln;
+               pause;
+               main;
+               exit;
+             End;
+         End
+  Else If opt = 'd' Then
+         Begin
+           execBusybox('vi '+HOME+'php.ini');
+           pause;
+           main;
+           exit;
+         End
+  Else If opt = 'i' Then
+         Begin
+           execBusybox('clear');
+           writeln('Genisys Android');
+           writeln('Version: '+PROG_VER);
+           writeln('Github repo: https://github.com/iTXTech/Genisys-Android');
+           writeln;
+           writeln('This application itself is based on Terminal Emulator for Android by jackpal.');
+           writeln('This program is made by PeratX.');
+           writeln('Genisys is made by iTX Technologies.');
+           writeln(
+'Genisys is a server software for Minecraft: Pocket Edition, which is based on the great project "PocketMine-MP".'
+           );
+           writeln;
+           writeln('Author: PeratX');
+           writeln('QQ: 1215714524');
+           writeln('E-mail: 1215714524@qq.com');
+           writeln;
+           pause;
+           main;
+           exit;
+         End
+  Else If opt = 'e' Then
+         Begin
+           initPhpConf(true);
+           writeln;
+           writeln('Done');
+           writeln;
+           pause;
+           main;
+           exit;
+         End
+  Else
+    Begin
+      throwError('Option not found !');
+      main;
+      exit;
+    End;
+End;
+Begin
+  If paramcount = 0 Then main
+  Else If paramstr(1) = '-v' Then writeln(PROG_VER);
+End.
