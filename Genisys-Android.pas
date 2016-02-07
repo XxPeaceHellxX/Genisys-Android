@@ -4,7 +4,6 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- *
  * Author: PeratX
  * Genisys-Android Project
 }
@@ -12,14 +11,42 @@
 program Genisys_Android;
 
 {$mode objfpc}
+
 uses dos,sysutils;
 
-const PROG_VER:string='v0.2.5 alpha';
+const PROG_VER:string='v0.2.6 alpha';
 const HOME:string='/data/data/org.itxtech.genisysandroid/files/';
 //const HOME:string='/data/data/com.n0n3m4.droidpascal/files/';//Only for test
 const SHELL:string='/system/bin/sh';
 
 var WORKSPACE:string='/sdcard/Genisys/';
+
+procedure testPerm;
+var
+	t:text;
+	path:string;
+begin
+	try
+		assign(t,HOME+'settings.conf');
+		reset(t);
+		close(t);
+	except
+		on EInOutError do begin
+			path:=extractFilePath(paramstr(0));
+			writeln('[NOTICE] Current working path '+path);
+			if path <> HOME then begin
+				writeln('[ALERT] Wrong working dir !');
+				writeln('[NOTICE] Try to reinstall the application !');
+			end;
+			writeln('[ERROR] Unable to access '+HOME+'settings.conf : Permission denied !');
+			halt;
+		end;
+		else begin
+			writeln('[ERROR] Unable to access '+HOME+'settings.conf : Unknown error');
+			halt;
+		end;
+	end;
+end;
 
 procedure execBusybox(cmd:string;needLine:boolean = true);
 begin
@@ -150,6 +177,7 @@ end;
 procedure main;
 var opt:string;
 begin
+	testPerm;
 	initWorkspace;
 	initPhpconf;
 	//checkUpdate;
@@ -177,6 +205,7 @@ begin
 	writeln('c. Set workspace');
 //	writeln;
 	writeln('d. Edit php.ini');
+	writeln('[NOTICE] Please edit before launch Genisys');
 //	writeln;
 	writeln('e. Rewrite php.ini');
 	writeln;
@@ -228,6 +257,7 @@ begin
 		end;
 	end else if opt = 'd' then begin
 		execBusybox('vi '+HOME+'php.ini');
+		pause;
 		main;
 		exit;
 	end else if opt = 'i' then begin
