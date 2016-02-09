@@ -1,4 +1,3 @@
-
 {
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +14,9 @@ Program Genisys_Android;
 
 Uses dos,sysutils;
 
-Const PROG_VER: string = 'v0.2.7 alpha';
-
-Const SHELL: string = '/system/bin/sh';
-
+Const 
+  PROG_VER: string = 'v0.2.8 alpha';
+  SHELL: string = '/system/bin/sh';
 
 Var 
   HOME: string;
@@ -37,6 +35,8 @@ Begin
   Except
     on EInOutError Do
     Begin
+
+
 
 {path:=extractFilePath(paramstr(0));
 			writeln('[NOTICE] Current working path '+path);
@@ -167,6 +167,8 @@ Begin;
 End;
 //usage of CRT unit will cause format errors
 
+
+
 {
 procedure writeVersion;
 var t:text;
@@ -208,7 +210,7 @@ Begin
   initPhpconf;
   //checkUpdate;
   //writeVersion;
-  execBusybox('rm '+HOME+'executable');
+  execBusybox('rm '+paramStr(0));
   execBusybox('mkdir '+WORKSPACE, false);
   execBusybox('mkdir '+WORKSPACE+'tmp', false);
   execBusybox('clear');
@@ -268,6 +270,8 @@ Begin
            writeln('[NOTICE] Now loading ...');
            If fileExists(WORKSPACE+'Genisys.phar') Then execPhp(WORKSPACE, 'Genisys.phar')
            Else If fileExists(WORKSPACE+'src/pocketmine/PocketMine.php') Then execPhp(WORKSPACE,
+
+
                                                                      'src/pocketmine/PocketMine.php'
                   )
            Else throwError('Genisys has not been installed !');
@@ -326,6 +330,8 @@ Begin
            writeln('This program is made by PeratX.');
            writeln('Genisys is made by iTX Technologies.');
            writeln(
+
+
 'Genisys is a server software for Minecraft: Pocket Edition, which is based on the great project "PocketMine-MP".'
            );
            writeln;
